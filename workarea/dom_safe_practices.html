@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'unsafe-inline';">
+    <title>Safe DOM Manipulation</title>
+</head>
+<body>
+    <h1>Safe DOM Manipulation: Avoiding XSS Vulnerabilities</h1>
+    
+    <h2>⚠️ Security Concept</h2>
+    <p>
+        When displaying user input, <strong>never trust the data</strong>. Malicious users can inject 
+        scripts that steal data or harm others. Always use safe methods like <code>textContent</code>.
+    </p>
+
+    <h2>❌ UNSAFE Example (Don't do this!)</h2>
+    <div id="unsafe-output" style="border: 2px solid red; padding: 10px; margin: 10px 0;"></div>
+    <script>
+        // DANGER: innerHTML can execute malicious scripts
+        const userInput = "<img src=x onerror='alert(\"XSS Attack!\")'>"; // Simulated attack
+        
+        // This is UNSAFE - don't use innerHTML with user input
+        // document.getElementById('unsafe-output').innerHTML = userInput;
+        
+        // Showing why it's dangerous (safely)
+        document.getElementById('unsafe-output').textContent = 
+            "⚠️ If we used innerHTML here, the malicious code would run: " + userInput;
+    </script>
+
+    <h2>✅ SAFE Example (Do this instead!)</h2>
+    <div id="safe-output" style="border: 2px solid green; padding: 10px; margin: 10px 0;"></div>
+    <script>
+        const userName = "<script>alert('Hacked!')</script>"; // Malicious input
+        
+        // SAFE: textContent treats everything as plain text, no code execution
+        const outputDiv = document.getElementById('safe-output');
+        outputDiv.textContent = "Welcome, " + userName;
+        
+        console.log("✅ User input displayed safely!");
+        console.log("The malicious script tags are shown as text, not executed.");
+    </script>
+
+    <h2>Example: Safe User Input Display</h2>
+    <input type="text" id="nameInput" placeholder="Enter your name">
+    <button id="submitBtn">Display Name</button>
+    <div id="result" style="margin-top: 10px; padding: 10px; background-color: #f0f0f0;"></div>
+    
+    <script>
+        document.getElementById('submitBtn').addEventListener('click', function() {
+            const input = document.getElementById('nameInput').value;
+            const resultDiv = document.getElementById('result');
+            
+            // ✅ SAFE: Use textContent for user input
+            resultDiv.textContent = "Hello, " + input + "!";
+            
+            // Alternative safe method: createElement
+            // const p = document.createElement('p');
+            // p.textContent = "Hello, " + input + "!";
+            // resultDiv.appendChild(p);
+        });
+    </script>
+
+    <div style="margin-top: 20px; padding: 15px; background-color: #fff3cd; border-left: 4px solid #ffc107;">
+        <strong>🔒 Security Rules:</strong>
+        <ul>
+            <li>Use <code>textContent</code> for displaying user input</li>
+            <li>Only use <code>innerHTML</code> with trusted, hardcoded content</li>
+            <li>If you must use HTML, sanitize it with a library (advanced topic)</li>
+            <li>Validate and limit user input before displaying it</li>
+        </ul>
+    </div>
+
+    <p style="margin-top: 20px;">
+        <strong>💡 Try it:</strong> Type <code>&lt;img src=x onerror="alert('test')"&gt;</code> 
+        in the input above. Notice it's displayed as text, not executed!
+    </p>
+</body>
+</html>

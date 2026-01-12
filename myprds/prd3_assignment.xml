@@ -1,0 +1,18 @@
+<!--
+[TOPIC] =' '
+-->
+<prompt>
+<title>JavaScript Tutor Prompt: Set an assignment</title>
+  <context>
+    I want to practice what I have learned about [TOPIC] in JavaScript.
+    Please give me two short, hands-on exercises that I can complete directly in a web browser.
+  </context>
+  <instructions>
+    1. Each exercise should be practical and beginner-friendly.
+    2. The tasks must run in a browser using <script> tags or the browser console.
+    3. Avoid Node.js or server-side examples.
+    4. Encourage me to think, not just copy and paste.
+    5. Do not give the answers yet.
+  </instructions>
+</prompt>
+            

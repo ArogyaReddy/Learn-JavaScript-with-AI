@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'unsafe-inline';">
+    <title>Variables and Data Types: var, let, and const</title>
+</head>
+<body>
+    <h1>Variables and Data Types: Declaring Variables</h1>
+    
+    <h2>Explanation</h2>
+    <p>
+        <strong>Variables</strong> store data values in JavaScript. You declare them using <code>var</code>, <code>let</code>, or <code>const</code>. 
+        Use <code>let</code> for values that change, <code>const</code> for values that don't, and avoid <code>var</code> (it's outdated). 
+        This helps prevent bugs and makes your code clearer.
+    </p>
+
+    <h2>Example 1: Using let and const</h2>
+    <script>
+        // const - value cannot be changed
+        const userName = "Alice";
+        console.log("User name:", userName);
+        
+        // let - value can be changed
+        let userAge = 25;
+        console.log("Initial age:", userAge);
+        
+        userAge = 26; // This works with let
+        console.log("Updated age:", userAge);
+        
+        // Trying to change const would cause an error:
+        // userName = "Bob"; // Uncommenting this line would break the code
+    </script>
+
+    <h2>Example 2: var vs let scope differences</h2>
+    <script>
+        // var has function scope (accessible everywhere)
+        var oldStyle = "I'm accessible everywhere";
+        
+        if (true) {
+            var oldStyle = "I was redeclared"; // This changes the original
+            let newStyle = "I only exist in this block";
+            console.log("Inside block - var:", oldStyle);
+            console.log("Inside block - let:", newStyle);
+        }
+        
+        console.log("Outside block - var:", oldStyle); // Changed!
+        // console.log(newStyle); // This would cause an error - newStyle doesn't exist here
+        
+        console.log("\nOpen your browser console (F12) to see the output!");
+    </script>
+
+    <div style="margin-top: 20px; padding: 15px; background-color: #f0f0f0; border-left: 4px solid #4CAF50;">
+        <strong>💡 Quick Reference:</strong>
+        <ul>
+            <li><code>const</code> - Use for values that won't change (constants)</li>
+            <li><code>let</code> - Use for values that will change</li>
+            <li><code>var</code> - Outdated, avoid using it</li>
+        </ul>
+    </div>
+</body>
+</html>

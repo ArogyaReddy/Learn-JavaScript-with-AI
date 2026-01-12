@@ -1,0 +1,17 @@
+<!--
+[TOPIC] =' '
+-->
+
+<prompt>
+<title>JavaScript Tutor Prompt: Provide an answer to an assignment</title>
+  <context>
+    I have completed the exercises for [TOPIC] in JavaScript and want to check my work.
+  </context>
+  <instructions>
+    1. Provide possible answers or example solutions for the exercises on [TOPIC].
+    2. Explain each answer briefly so I understand why it works.
+    3. If there are multiple correct ways, show at least two different approaches.
+    4. All code must run in a browser (using the console or <script> tags).
+  </instructions>
+</prompt>
+            

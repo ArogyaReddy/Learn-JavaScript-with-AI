@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'unsafe-inline';">
+    <title>Modern JavaScript: ES6+ Features</title>
+</head>
+<body>
+    <h1>Modern JavaScript: Essential ES6+ Features</h1>
+    
+    <h2>1. Arrow Functions</h2>
+    <p>Shorter syntax for writing functions, especially useful for callbacks.</p>
+    <script>
+        console.log("=== Arrow Functions ===");
+        
+        // Traditional function
+        const addOld = function(a, b) {
+            return a + b;
+        };
+        
+        // Arrow function - more concise
+        const addNew = (a, b) => a + b;
+        
+        // Single parameter - parentheses optional
+        const double = num => num * 2;
+        
+        console.log("5 + 3 =", addNew(5, 3));      // 8
+        console.log("Double 5 =", double(5));       // 10
+    </script>
+
+    <h2>2. Destructuring</h2>
+    <p>Extract values from arrays or objects into variables easily.</p>
+    <script>
+        console.log("\n=== Destructuring ===");
+        
+        // Array destructuring
+        const colors = ['red', 'green', 'blue'];
+        const [first, second, third] = colors;
+        console.log("First color:", first);         // red
+        
+        // Object destructuring
+        const user = {
+            name: 'Alice',
+            age: 25,
+            city: 'Paris'
+        };
+        const { name, age } = user;
+        console.log("User:", name, "Age:", age);    // Alice, 25
+        
+        // With default values
+        const { country = 'Unknown' } = user;
+        console.log("Country:", country);           // Unknown
+    </script>
+
+    <h2>3. Spread Operator (...)</h2>
+    <p>Expand arrays or objects, useful for copying and combining data.</p>
+    <script>
+        console.log("\n=== Spread Operator ===");
+        
+        // Copying an array
+        const original = [1, 2, 3];
+        const copy = [...original];
+        copy.push(4);
+        console.log("Original:", original);         // [1, 2, 3]
+        console.log("Copy:", copy);                 // [1, 2, 3, 4]
+        
+        // Combining arrays
+        const fruits = ['apple', 'banana'];
+        const vegetables = ['carrot', 'broccoli'];
+        const food = [...fruits, ...vegetables];
+        console.log("All food:", food);
+        
+        // Copying objects
+        const person = { name: 'Bob', age: 30 };
+        const employee = { ...person, job: 'Developer' };
+        console.log("Employee:", employee);
+    </script>
+
+    <h2>4. Template Literals</h2>
+    <p>Create strings with embedded variables and expressions using backticks (`).</p>
+    <script>
+        console.log("\n=== Template Literals ===");
+        
+        const userName = 'Alice';
+        const score = 95;
+        
+        // Old way (string concatenation)
+        const oldMessage = 'User ' + userName + ' scored ' + score + ' points.';
+        
+        // New way (template literal)
+        const newMessage = `User ${userName} scored ${score} points.`;
+        
+        console.log(newMessage);
+        
+        // Multi-line strings
+        const html = `
+            <div>
+                <h2>${userName}</h2>
+                <p>Score: ${score}</p>
+            </div>
+        `;
+        console.log("HTML:", html);
+        
+        // Expressions inside templates
+        console.log(`Double score: ${score * 2}`);
+    </script>
+
+    <h2>5. Default Parameters</h2>
+    <p>Set default values for function parameters if not provided.</p>
+    <script>
+        console.log("\n=== Default Parameters ===");
+        
+        // Function with default parameters
+        function greet(name = 'Guest', greeting = 'Hello') {
+            return `${greeting}, ${name}!`;
+        }
+        
+        console.log(greet());                       // Hello, Guest!
+        console.log(greet('Alice'));                // Hello, Alice!
+        console.log(greet('Bob', 'Hi'));           // Hi, Bob!
+    </script>
+
+    <h2>Interactive Example: User Profile Builder</h2>
+    <div style="margin: 20px 0; padding: 20px; background-color: #f8f9fa; border-radius: 5px;">
+        <input type="text" id="profileName" placeholder="Your name" style="margin: 5px; padding: 8px;">
+        <input type="number" id="profileAge" placeholder="Your age" style="margin: 5px; padding: 8px;">
+        <input type="text" id="profileCity" placeholder="Your city" style="margin: 5px; padding: 8px;">
+        <button id="buildProfile" style="margin: 5px; padding: 8px 16px;">Build Profile</button>
+        <div id="profileOutput" style="margin-top: 15px; padding: 15px; background-color: white; border-radius: 3px;"></div>
+    </div>
+    
+    <script>
+        document.getElementById('buildProfile').addEventListener('click', () => {
+            // Get input values with defaults
+            const name = document.getElementById('profileName').value || 'Anonymous';
+            const age = document.getElementById('profileAge').value || '?';
+            const city = document.getElementById('profileCity').value || 'Unknown';
+            
+            // Create profile object
+            const profile = { name, age, city }; // ES6 shorthand
+            
+            // Destructure for display
+            const { name: displayName, age: displayAge, city: displayCity } = profile;
+            
+            // Use template literals for output
+            const output = `
+                <strong>Profile Created:</strong><br>
+                Name: ${displayName}<br>
+                Age: ${displayAge}<br>
+                City: ${displayCity}
+            `;
+            
+            // Safe display using innerHTML (content is controlled by us, not user)
+            // For extra safety, use textContent when possible
+            const outputDiv = document.getElementById('profileOutput');
+            outputDiv.innerHTML = output;
+            
+            console.log("Profile object:", profile);
+        });
+    </script>
+
+    <div style="margin-top: 20px; padding: 15px; background-color: #e8f5e9; border-left: 4px solid #4CAF50;">
+        <strong>✅ Why Use Modern JavaScript?</strong>
+        <ul>
+            <li><strong>Cleaner code:</strong> Less verbose, easier to read</li>
+            <li><strong>Fewer bugs:</strong> Features like const prevent accidental changes</li>
+            <li><strong>Better performance:</strong> Optimized by modern browsers</li>
+            <li><strong>Industry standard:</strong> Used in all modern web development</li>
+        </ul>
+    </div>
+
+    <p style="margin-top: 20px; padding: 10px; background-color: #f0f0f0;">
+        <strong>🔍 Open the browser console (F12) to see all examples!</strong>
+    </p>
+</body>
+</html>

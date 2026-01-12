@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AGENTS.md - Complete Guide</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+        header h1 {
+            font-size: 3em;
+            margin-bottom: 10px;
+        }
+        .content {
+            padding: 40px;
+        }
+        h2 {
+            color: #667eea;
+            margin: 30px 0 15px 0;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+        }
+        h3 {
+            color: #764ba2;
+            margin: 20px 0 10px 0;
+        }
+        .comparison {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin: 30px 0;
+        }
+        .panel {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 25px;
+            border: 2px solid #e0e0e0;
+        }
+        .panel h3 {
+            margin-top: 0;
+        }
+        .code-block {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            overflow-x: auto;
+            line-height: 1.6;
+        }
+        .highlight {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+        .success {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+        .error {
+            background: #f8d7da;
+            border-left: 4px solid #dc3545;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background: #667eea;
+            color: white;
+            font-weight: bold;
+        }
+        tr:hover {
+            background: #f5f5f5;
+        }
+        .step {
+            background: white;
+            padding: 20px;
+            margin: 15px 0;
+            border-left: 4px solid #667eea;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .step-number {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 35px;
+            margin-right: 15px;
+            font-weight: bold;
+            font-size: 18px;
+        }
+        .vs {
+            background: #764ba2;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-weight: bold;
+            text-align: center;
+            margin: 20px auto;
+            width: fit-content;
+        }
+        ul {
+            margin: 15px 0;
+            padding-left: 25px;
+        }
+        li {
+            margin: 8px 0;
+            line-height: 1.6;
+        }
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .feature-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        .feature-card h4 {
+            margin-bottom: 10px;
+            font-size: 1.2em;
+        }
+        .btn {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 5px;
+            text-decoration: none;
+            margin: 10px 10px 10px 0;
+            transition: all 0.3s;
+        }
+        .btn:hover {
+            background: #764ba2;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🤖 AGENTS.md Complete Guide</h1>
+            <p>Understanding Custom GitHub Copilot Agents</p>
+        </header>
+
+        <div class="content">
+            <h2>What is AGENTS.md?</h2>
+            <p><strong>AGENTS.md</strong> is a file that defines custom agent behaviors for GitHub Copilot. Unlike SKILLS (which are called on-demand), AGENTS are always active and modify how Copilot behaves in your workspace.</p>
+
+            <div class="comparison">
+                <div class="panel">
+                    <h3>🎯 SKILLS</h3>
+                    <ul>
+                        <li><strong>Location:</strong> <code>.github/skills/</code></li>
+                        <li><strong>Format:</strong> Folder with SKILL.md</li>
+                        <li><strong>Activation:</strong> On-demand (user triggers)</li>
+                        <li><strong>Purpose:</strong> Specialized tasks</li>
+                        <li><strong>Example:</strong> "tip of the day"</li>
+                    </ul>
+                </div>
+
+                <div class="panel">
+                    <h3>🤖 AGENTS</h3>
+                    <ul>
+                        <li><strong>Location:</strong> Root or <code>.github/</code></li>
+                        <li><strong>Format:</strong> Single AGENTS.md file</li>
+                        <li><strong>Activation:</strong> Always active</li>
+                        <li><strong>Purpose:</strong> Modify Copilot behavior</li>
+                        <li><strong>Example:</strong> Auto mentoring mode</li>
+                    </ul>
+                </div>
+            </div>
+
+            <h2>Why Do You Need AGENTS.md?</h2>
+            
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <h4>🎭 Behavioral Customization</h4>
+                    <p>Make Copilot act as a mentor, code reviewer, or specific role</p>
+                </div>
+                <div class="feature-card">
+                    <h4>🔄 Always Active</h4>
+                    <p>No need to invoke - behaviors apply to all interactions</p>
+                </div>
+                <div class="feature-card">
+                    <h4>📚 Multiple Personas</h4>
+                    <p>Define different agent modes for different contexts</p>
+                </div>
+                <div class="feature-card">
+                    <h4>🎯 Context-Aware</h4>
+                    <p>Agents understand your project and respond accordingly</p>
+                </div>
+            </div>
+
+            <h2>Your Current AGENTS.md - Analysis</h2>
+
+            <div class="error">
+                <strong>❌ Problem:</strong> Your AGENTS.md is <strong>NOT WORKING</strong> because:
+                <ul style="margin-top: 10px;">
+                    <li>Format is incorrect (not standard .agent.md format)</li>
+                    <li>Missing proper frontmatter metadata</li>
+                    <li>Located at root instead of proper location</li>
+                    <li>Not following GitHub Copilot agent specification</li>
+                </ul>
+            </div>
+
+            <h3>Current (Incorrect) Format:</h3>
+            <div class="code-block">---
+# Agents
+
+## TipOfTheDay
+role: system
+description: Daily productivity/mindset tip
+instructions: |
+  You are TipOfTheDay.
+  - Output exactly one concise tip (50–80 words).
+  ...</div>
+
+            <h3>Correct Format:</h3>
+            <div class="code-block">---
+description: 'Daily productivity tip for senior automation architect'
+---
+
+# TipOfTheDay Agent
+
+You are TipOfTheDay, a productivity coach for automation architects.
+
+## Behavior
+- Provide exactly one tip per response (50-80 words)
+- Focus on: test automation, VS Code, Playwright, TypeScript
+- Give concrete, actionable advice
+- Avoid generic motivational quotes
+
+## Example
+User: "How can I improve my testing workflow?"
+Response: "💡 Batch your test runs..."</div>
+
+            <h2>AGENTS vs SKILLS - Complete Comparison</h2>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Feature</th>
+                        <th>AGENTS</th>
+                        <th>SKILLS</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>File Structure</strong></td>
+                        <td>Single AGENTS.md file OR<br>Multiple *.agent.md files</td>
+                        <td>Folder per skill with SKILL.md</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Location</strong></td>
+                        <td><code>/</code> or <code>.github/</code></td>
+                        <td><code>.github/skills/[name]/</code></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Activation</strong></td>
+                        <td>Automatic/always-on</td>
+                        <td>User triggers explicitly</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Bundled Assets</strong></td>
+                        <td>No</td>
+                        <td>Yes (scripts, templates, data)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Use Case</strong></td>
+                        <td>Behavioral modification</td>
+                        <td>Specialized workflows</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Example</strong></td>
+                        <td>Code review mode, Mentor mode</td>
+                        <td>GitHub issue creator, Test generator</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h2>How to Fix Your AGENTS.md</h2>
+
+            <div class="step">
+                <span class="step-number">1</span>
+                <strong>Decide: Do you want AGENTS or SKILLS?</strong>
+                <p style="margin-top: 10px;">
+                    Based on your "TipOfTheDay" implementation, you actually want <strong>SKILLS</strong> (already created ✓).
+                    Your current AGENTS.md should be deleted or converted.
+                </p>
+            </div>
+
+            <div class="step">
+                <span class="step-number">2</span>
+                <strong>If You Want AGENTS (persistent behavior)</strong>
+                <p style="margin-top: 10px;">
+                    Create individual .agent.md files in <code>.github/agents/</code> folder:
+                </p>
+                <ul style="margin-top: 10px;">
+                    <li><code>.github/agents/mentor.agent.md</code></li>
+                    <li><code>.github/agents/code-reviewer.agent.md</code></li>
+                </ul>
+            </div>
+
+            <div class="step">
+                <span class="step-number">3</span>
+                <strong>Use Proper Agent Format</strong>
+                <p style="margin-top: 10px;">Each .agent.md file needs YAML frontmatter + markdown instructions</p>
+            </div>
+
+            <h2>Real Implementation Example</h2>
+
+            <h3>Example 1: Mentor Agent (Always Active)</h3>
+            <p><strong>File:</strong> <code>.github/agents/mentor.agent.md</code></p>
+            <div class="code-block">---
+description: 'Patient mentor who guides learning through questions rather than giving direct answers'
+model: 'claude-sonnet-4'
+---
+
+# JavaScript Mentor Agent
+
+You are a patient, encouraging mentor teaching browser-based JavaScript.
+
+## Teaching Philosophy
+- Ask guiding questions before giving answers
+- Encourage experimentation in browser console
+- Focus on practical, working examples
+- Keep explanations concise (not too long)
+
+## Code Standards
+- Use plain JavaScript (no Node.js)
+- Inline <script> tags in HTML for easy testing
+- Save examples in 'workarea' folder
+- Test all code in browser before suggesting
+
+## Example Interaction
+
+**User:** "How do I add a click event?"
+
+**You:** "Great question! Before I show you, try this: 
+1. Open browser console
+2. Try: document.querySelector('#myButton')
+3. What does it return?
+
+This helps you understand what we're working with."
+
+## Response Style
+- ✅ Encourage self-discovery
+- ✅ Provide working code examples
+- ✅ Explain WHY, not just HOW
+- ❌ Don't overwhelm with theory
+- ❌ Don't use complex frameworks</div>
+
+            <h3>Example 2: Code Reviewer Agent</h3>
+            <p><strong>File:</strong> <code>.github/agents/code-reviewer.agent.md</code></p>
+            <div class="code-block">---
+description: 'Code reviewer focusing on JavaScript best practices, browser compatibility, and error handling'
+model: 'gpt-4'
+---
+
+# Code Reviewer
+
+You review JavaScript code with focus on:
+
+## Review Checklist
+1. **Error Handling**: Try-catch blocks, null checks
+2. **Browser Compatibility**: Use modern but supported APIs
+3. **Performance**: Avoid unnecessary DOM queries
+4. **Accessibility**: Proper ARIA labels, keyboard support
+5. **Security**: Input validation, XSS prevention
+
+## Review Format
+
+### Code Issues Found
+- [CRITICAL] Description
+- [WARNING] Description  
+- [SUGGESTION] Description
+
+### Recommended Fix
+```javascript
+// Fixed code here
+```
+
+### Why This Matters
+Brief explanation of impact</div>
+
+            <h2>Testing Your Agents</h2>
+
+            <div class="highlight">
+                <strong>⚠️ Important:</strong> Agents are ALWAYS active. Once you add them, they influence all Copilot interactions in your workspace.
+            </div>
+
+            <h3>To Test:</h3>
+            <ol>
+                <li>Create .agent.md file in <code>.github/agents/</code></li>
+                <li>Reload VS Code window (<code>Cmd+Shift+P</code> → "Reload Window")</li>
+                <li>Open Copilot Chat</li>
+                <li>Notice different behavior (more mentoring, stricter reviews, etc.)</li>
+            </ol>
+
+            <h2>Best Practices</h2>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Do</th>
+                        <th>Don't</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>✅ Use AGENTS for persistent behavioral changes</td>
+                        <td>❌ Use AGENTS for one-off tasks</td>
+                    </tr>
+                    <tr>
+                        <td>✅ Use SKILLS for triggered workflows</td>
+                        <td>❌ Mix agent and skill responsibilities</td>
+                    </tr>
+                    <tr>
+                        <td>✅ Include concrete examples in agents</td>
+                        <td>❌ Write vague instructions</td>
+                    </tr>
+                    <tr>
+                        <td>✅ Specify model preference in frontmatter</td>
+                        <td>❌ Forget frontmatter metadata</td>
+                    </tr>
+                    <tr>
+                        <td>✅ Test agents in isolation first</td>
+                        <td>❌ Add multiple untested agents at once</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h2>Recommendation for Your Setup</h2>
+
+            <div class="success">
+                <strong>✅ Recommended Approach:</strong>
+                <ol style="margin-top: 10px;">
+                    <li><strong>Keep SKILLS</strong> for tip-of-the-day, tip-of-the-learning, tip-of-the-work (already working)</li>
+                    <li><strong>Add ONE AGENT</strong> for JavaScript mentoring (persistent teaching mode)</li>
+                    <li><strong>Delete or ignore</strong> current AGENTS.md (not in correct format)</li>
+                </ol>
+            </div>
+
+            <h2>Summary</h2>
+
+            <table>
+                <tr>
+                    <th>Concept</th>
+                    <th>What It Is</th>
+                    <th>When to Use</th>
+                </tr>
+                <tr>
+                    <td><strong>AGENTS.md</strong></td>
+                    <td>File defining persistent Copilot behaviors</td>
+                    <td>Want Copilot to always act as mentor/reviewer</td>
+                </tr>
+                <tr>
+                    <td><strong>.agent.md</strong></td>
+                    <td>Individual agent definition file</td>
+                    <td>Modern format for GitHub Copilot agents</td>
+                </tr>
+                <tr>
+                    <td><strong>SKILL.md</strong></td>
+                    <td>On-demand specialized workflow</td>
+                    <td>User explicitly requests functionality</td>
+                </tr>
+                <tr>
+                    <td><strong>Your Current File</strong></td>
+                    <td>Incorrect hybrid format</td>
+                    <td>Should be converted or deleted</td>
+                </tr>
+            </table>
+
+            <div class="highlight" style="margin-top: 30px; text-align: center;">
+                <p style="font-size: 1.2em;"><strong>Bottom Line:</strong></p>
+                <p>Your SKILLS are correct and working ✓<br>
+                Your AGENTS.md needs fixing or deletion ✗<br>
+                Consider adding a proper JavaScript mentor agent for persistent teaching mode</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

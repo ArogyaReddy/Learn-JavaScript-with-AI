@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Error Handling: try...catch</title>
+</head>
+<body>
+    <h1>Error Handling: Preventing Crashes</h1>
+    
+    <h2>Why Error Handling Matters</h2>
+    <p>
+        Errors happen! Users enter unexpected data, networks fail, or code has bugs. 
+        <strong>Error handling</strong> lets your program catch errors gracefully instead of crashing.
+    </p>
+
+    <h2>Example 1: Basic try...catch</h2>
+    <script>
+        console.log("=== Example 1: Basic Error Handling ===");
+        
+        // Without error handling - this would crash
+        try {
+            const data = JSON.parse('{ invalid json }'); // This will fail
+            console.log(data);
+        } catch (error) {
+            console.error("⚠️ Caught an error:", error.message);
+            console.log("✅ But the program continues running!");
+        }
+        
+        console.log("Program is still running after the error.");
+    </script>
+
+    <h2>Example 2: User Input Validation</h2>
+    <div style="margin: 20px 0; padding: 15px; background-color: #f8f9fa; border-radius: 5px;">
+        <label for="ageInput">Enter your age:</label>
+        <input type="number" id="ageInput" placeholder="e.g., 25">
+        <button id="validateBtn">Validate</button>
+        <p id="validationResult" style="margin-top: 10px; font-weight: bold;"></p>
+    </div>
+    
+    <script>
+        document.getElementById('validateBtn').addEventListener('click', function() {
+            const input = document.getElementById('ageInput').value;
+            const resultElement = document.getElementById('validationResult');
+            
+            try {
+                // Convert to number
+                const age = Number(input);
+                
+                // Validate the input
+                if (input === '' || input === null) {
+                    throw new Error("Please enter an age!");
+                }
+                
+                if (isNaN(age)) {
+                    throw new Error("Age must be a number!");
+                }
+                
+                if (age < 0) {
+                    throw new Error("Age cannot be negative!");
+                }
+                
+                if (age > 150) {
+                    throw new Error("Age seems unrealistic!");
+                }
+                
+                // If we get here, input is valid
+                resultElement.textContent = "✅ Valid age: " + age + " years old";
+                resultElement.style.color = "green";
+                
+            } catch (error) {
+                // Display the error to the user
+                resultElement.textContent = "❌ Error: " + error.message;
+                resultElement.style.color = "red";
+                console.error("Validation failed:", error.message);
+            }
+        });
+    </script>
+
+    <h2>Example 3: Safe Function with Error Handling</h2>
+    <script>
+        console.log("\n=== Example 3: Function with Error Handling ===");
+        
+        // A safe division function
+        function safeDivide(a, b) {
+            try {
+                // Check if inputs are numbers
+                if (typeof a !== 'number' || typeof b !== 'number') {
+                    throw new Error("Both inputs must be numbers");
+                }
+                
+                // Check for division by zero
+                if (b === 0) {
+                    throw new Error("Cannot divide by zero");
+                }
+                
+                return a / b;
+                
+            } catch (error) {
+                console.error("Division error:", error.message);
+                return null; // Return null to indicate failure
+            }
+        }
+        
+        // Test the function
+        console.log("10 / 2 =", safeDivide(10, 2));        // ✅ Works: 5
+        console.log("10 / 0 =", safeDivide(10, 0));        // ❌ Caught error
+        console.log("'10' / 2 =", safeDivide('10', 2));    // ❌ Caught error
+    </script>
+
+    <div style="margin-top: 20px; padding: 15px; background-color: #e7f3ff; border-left: 4px solid #2196F3;">
+        <strong>💡 Best Practices:</strong>
+        <ul>
+            <li>Always validate user input before using it</li>
+            <li>Use <code>try...catch</code> for operations that might fail (parsing, calculations)</li>
+            <li>Provide helpful error messages to users</li>
+            <li>Log errors to the console for debugging</li>
+            <li>Never let errors crash your entire application</li>
+        </ul>
+    </div>
+
+    <div style="margin-top: 20px; padding: 15px; background-color: #f0f0f0; border-left: 4px solid #4CAF50;">
+        <strong>🔍 Open the browser console (F12) to see all error messages!</strong>
+    </div>
+</body>
+</html>

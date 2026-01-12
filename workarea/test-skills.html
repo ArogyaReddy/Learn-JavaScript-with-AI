@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Testing SKILLS - Hands-On Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        .content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            padding: 30px;
+        }
+        .panel {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            border: 2px solid #e0e0e0;
+        }
+        .panel h2 {
+            color: #667eea;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .test-section {
+            grid-column: 1 / -1;
+            background: #fff;
+            border: 3px solid #667eea;
+            padding: 25px;
+            border-radius: 10px;
+        }
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin: 5px;
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        button:active {
+            transform: translateY(0);
+        }
+        .output-box {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            min-height: 150px;
+            max-height: 400px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            line-height: 1.6;
+        }
+        .step {
+            background: white;
+            padding: 15px;
+            margin: 10px 0;
+            border-left: 4px solid #667eea;
+            border-radius: 5px;
+        }
+        .step-number {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 30px;
+            margin-right: 10px;
+            font-weight: bold;
+        }
+        .code-inline {
+            background: #e8eaf6;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            color: #5e35b1;
+        }
+        .trigger-box {
+            background: #e8f5e9;
+            border: 2px dashed #4caf50;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+        .success {
+            color: #4caf50;
+            font-weight: bold;
+        }
+        .warning {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background: #667eea;
+            color: white;
+            font-weight: bold;
+        }
+        tr:hover {
+            background: #f5f5f5;
+        }
+        .skill-badge {
+            display: inline-block;
+            background: #764ba2;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            margin: 5px 5px 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🧪 Test Your SKILLS Implementation</h1>
+            <p>Interactive testing guide for GitHub Copilot Skills</p>
+        </header>
+
+        <div class="content">
+            <!-- Implementation Status Panel -->
+            <div class="panel">
+                <h2>📋 Implementation Checklist</h2>
+                <table>
+                    <tr>
+                        <th>Skill</th>
+                        <th>Status</th>
+                    </tr>
+                    <tr>
+                        <td>tip-of-the-day</td>
+                        <td id="status-1" class="success">✓ Enhanced</td>
+                    </tr>
+                    <tr>
+                        <td>tip-of-the-learning</td>
+                        <td id="status-2" class="success">✓ Enhanced</td>
+                    </tr>
+                    <tr>
+                        <td>tip-of-the-work</td>
+                        <td id="status-3" class="success">✓ Enhanced</td>
+                    </tr>
+                </table>
+            </div>
+
+            <!-- Skills Location Panel -->
+            <div class="panel">
+                <h2>📁 Your Skills Location</h2>
+                <div style="margin-top: 15px;">
+                    <div class="code-inline" style="display: block; margin: 5px 0;">
+                        .github/skills/tip-of-the-day/
+                    </div>
+                    <div class="code-inline" style="display: block; margin: 5px 0;">
+                        .github/skills/tip-of-the-learning/
+                    </div>
+                    <div class="code-inline" style="display: block; margin: 5px 0;">
+                        .github/skills/tip-of-the-work/
+                    </div>
+                </div>
+                <div class="warning" style="margin-top: 15px;">
+                    <strong>⚠️ Note:</strong> Skills must be in <code class="code-inline">.github/skills/</code> folder to be auto-discovered by GitHub Copilot.
+                </div>
+            </div>
+
+            <!-- Testing Guide -->
+            <div class="test-section">
+                <h2>🧪 How to Test Your Skills</h2>
+                
+                <div class="step">
+                    <span class="step-number">1</span>
+                    <strong>Open GitHub Copilot Chat</strong>
+                    <p style="margin-top: 10px;">
+                        In VS Code, click the Copilot icon in the sidebar or press 
+                        <span class="code-inline">Cmd+Shift+I</span> (Mac) / 
+                        <span class="code-inline">Ctrl+Shift+I</span> (Windows)
+                    </p>
+                </div>
+
+                <div class="step">
+                    <span class="step-number">2</span>
+                    <strong>Test Each Skill with Trigger Phrases</strong>
+                    <p style="margin-top: 10px;">Try these exact phrases:</p>
+                </div>
+
+                <div class="trigger-box">
+                    <strong>🎯 For tip-of-the-day:</strong>
+                    <button onclick="copyToClipboard('Give me a tip of the day')">📋 Copy</button>
+                    <div style="margin-top: 10px; font-family: monospace;">
+                        "Give me a tip of the day"
+                    </div>
+                </div>
+
+                <div class="trigger-box">
+                    <strong>📚 For tip-of-the-learning:</strong>
+                    <button onclick="copyToClipboard('What should I learn next?')">📋 Copy</button>
+                    <div style="margin-top: 10px; font-family: monospace;">
+                        "What should I learn next?"
+                    </div>
+                </div>
+
+                <div class="trigger-box">
+                    <strong>🎯 For tip-of-the-work:</strong>
+                    <button onclick="copyToClipboard('What should I work on?')">📋 Copy</button>
+                    <div style="margin-top: 10px; font-family: monospace;">
+                        "What should I work on?"
+                    </div>
+                </div>
+
+                <div class="step">
+                    <span class="step-number">3</span>
+                    <strong>Verify Response Format</strong>
+                    <p style="margin-top: 10px;">Check if Copilot's response matches the expected format below:</p>
+                </div>
+
+                <h3 style="margin-top: 30px; color: #667eea;">Expected Response Formats</h3>
+                
+                <button onclick="showExpectedFormat('tip-of-the-day')">Show tip-of-the-day Format</button>
+                <button onclick="showExpectedFormat('tip-of-the-learning')">Show tip-of-the-learning Format</button>
+                <button onclick="showExpectedFormat('tip-of-the-work')">Show tip-of-the-work Format</button>
+                
+                <div id="formatOutput" class="output-box"></div>
+            </div>
+
+            <!-- Troubleshooting Panel -->
+            <div class="test-section">
+                <h2>🔧 Troubleshooting</h2>
+                
+                <h3 style="color: #764ba2; margin-top: 20px;">Skills Not Working?</h3>
+                
+                <div class="step">
+                    <span class="step-number">✓</span>
+                    <strong>Check File Location</strong>
+                    <p style="margin-top: 10px;">
+                        Skills MUST be in: <span class="code-inline">.github/skills/[skill-name]/SKILL.md</span>
+                    </p>
+                </div>
+
+                <div class="step">
+                    <span class="step-number">✓</span>
+                    <strong>Verify YAML Frontmatter</strong>
+                    <p style="margin-top: 10px;">
+                        Each SKILL.md must start with:
+                    </p>
+                    <pre style="background: #f0f0f0; padding: 10px; margin-top: 10px; border-radius: 5px;">---
+name: skill-name
+description: 'When to use this'
+---</pre>
+                </div>
+
+                <div class="step">
+                    <span class="step-number">✓</span>
+                    <strong>Restart VS Code</strong>
+                    <p style="margin-top: 10px;">
+                        After adding/modifying skills, restart VS Code or reload the window:
+                        <span class="code-inline">Cmd+Shift+P</span> → "Reload Window"
+                    </p>
+                </div>
+
+                <div class="step">
+                    <span class="step-number">✓</span>
+                    <strong>Check Copilot Version</strong>
+                    <p style="margin-top: 10px;">
+                        Skills require GitHub Copilot Chat extension. Update to latest version.
+                    </p>
+                </div>
+
+                <div class="step">
+                    <span class="step-number">✓</span>
+                    <strong>Be Explicit</strong>
+                    <p style="margin-top: 10px;">
+                        If auto-discovery fails, explicitly reference: "Use the tip-of-the-day skill to give me a tip"
+                    </p>
+                </div>
+            </div>
+
+            <!-- Advanced Usage -->
+            <div class="test-section">
+                <h2>🚀 Advanced Usage</h2>
+                
+                <h3 style="color: #667eea;">Combining Skills with Context</h3>
+                
+                <div class="trigger-box">
+                    <strong>Context-Aware Learning:</strong>
+                    <div style="margin-top: 10px; font-family: monospace;">
+                        "I'm working on async functions. What should I learn next?"
+                    </div>
+                    <button onclick="copyToClipboard('I\'m working on async functions. What should I learn next?')">📋 Copy</button>
+                </div>
+
+                <div class="trigger-box">
+                    <strong>Specific Technology Tip:</strong>
+                    <div style="margin-top: 10px; font-family: monospace;">
+                        "Give me a Playwright tip of the day"
+                    </div>
+                    <button onclick="copyToClipboard('Give me a Playwright tip of the day')">📋 Copy</button>
+                </div>
+
+                <div class="trigger-box">
+                    <strong>File-Specific Work Suggestion:</strong>
+                    <div style="margin-top: 10px; font-family: monospace;">
+                        "What should I work on in the workarea folder?"
+                    </div>
+                    <button onclick="copyToClipboard('What should I work on in the workarea folder?')">📋 Copy</button>
+                </div>
+            </div>
+
+            <!-- Quick Reference -->
+            <div class="panel" style="grid-column: 1 / -1;">
+                <h2>📚 Quick Reference</h2>
+                
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Skill</th>
+                            <th>Trigger Phrases</th>
+                            <th>What It Does</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><span class="skill-badge">tip-of-the-day</span></td>
+                            <td>"tip", "daily advice", "give me a tip"</td>
+                            <td>Returns one practical productivity tip</td>
+                        </tr>
+                        <tr>
+                            <td><span class="skill-badge">tip-of-the-learning</span></td>
+                            <td>"what to learn", "learning suggestion"</td>
+                            <td>Suggests 20-40 min learning session</td>
+                        </tr>
+                        <tr>
+                            <td><span class="skill-badge">tip-of-the-work</span></td>
+                            <td>"what to work on", "next task"</td>
+                            <td>Analyzes repo and suggests 25-45 min task</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                alert('✓ Copied to clipboard! Paste into Copilot Chat.');
+            }).catch(err => {
+                console.error('Copy failed:', err);
+            });
+        }
+
+        function showExpectedFormat(skillName) {
+            const output = document.getElementById('formatOutput');
+            
+            const formats = {
+                'tip-of-the-day': `Expected Format for tip-of-the-day:
+
+💡 **[Category]**: [Tip Title]
+
+[Description in 50-80 words with concrete, actionable advice]
+
+**Try it now:**
+\`[specific command, code snippet, or setting]\`
+
+Example:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+💡 **Flaky Test Reduction**: Use data-testid over CSS selectors
+
+Flaky tests often break when designers change class names. Add 
+\`data-testid\` attributes to critical UI elements and use 
+\`page.getByTestId('login-button')\` instead of 
+\`page.locator('.btn-primary')\`. This isolates tests from styling changes.
+
+**Try it now:**
+\`await page.getByTestId('submit-form').click()\`
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`,
+
+                'tip-of-the-learning': `Expected Format for tip-of-the-learning:
+
+📚 **[Topic]**: [Specific Skill]
+
+**Goal**: [One clear learning objective]
+
+**Steps:**
+1. [Concrete action with file/command]
+2. [Concrete action with file/command]
+3. [Concrete action with file/command]
+4. [Concrete action with file/command]
+5. [Optional: additional step]
+
+**Practice Task:**
+[Small, achievable exercise to apply the learning]
+
+Example:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📚 **Playwright**: Master Test Fixtures for Reusable Setup
+
+**Goal**: Learn to create custom fixtures that share authenticated 
+contexts across tests, reducing duplication and setup time.
+
+**Steps:**
+1. Read Playwright docs on fixtures
+2. Create \`fixtures/auth.ts\` with custom fixture
+3. Export using \`test.extend()\` pattern
+4. Update 2-3 tests to use new fixture
+5. Run: \`npx playwright test --grep @auth\`
+
+**Practice Task:**
+Create a \`dbFixture\` that seeds test data before each test and 
+cleans up afterward. Use it in one test file.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`,
+
+                'tip-of-the-work': `Expected Format for tip-of-the-work:
+
+🎯 **Next Task**: [Specific, actionable task title]
+
+**Why it matters:**
+[2-3 sentences explaining business/technical value]
+
+**Estimated time:** [25-45 minutes]
+
+**Checklist:**
+- [ ] [Specific step with file/command]
+- [ ] [Specific step with file/command]
+- [ ] [Specific step with file/command]
+- [ ] [Optional: verification step]
+
+**Success criteria:**
+[How to verify the task is complete]
+
+Example:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🎯 **Next Task**: Add error handling to async examples
+
+**Why it matters:**
+Your HTML examples in workarea/ don't handle errors when elements 
+are missing, which could confuse learners about proper error 
+handling in browser JavaScript.
+
+**Estimated time:** 30 minutes
+
+**Checklist:**
+- [ ] Review workarea/*.html files for async operations
+- [ ] Add try-catch blocks to event handlers
+- [ ] Add null checks for DOM querySelector results
+- [ ] Test in browser console with missing elements
+
+**Success criteria:**
+All examples handle errors gracefully and log helpful messages.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`
+            };
+
+            output.textContent = formats[skillName] || 'Format not found';
+        }
+
+        // Initialize with first format
+        window.addEventListener('load', () => {
+            console.log('🧪 SKILLS Testing Guide Loaded');
+            console.log('✓ All skills have been enhanced');
+            console.log('📋 Use the copy buttons to test in Copilot Chat');
+        });
+    </script>
+</body>
+</html>

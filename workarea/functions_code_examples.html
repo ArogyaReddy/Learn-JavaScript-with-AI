@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Functions: Declaring and Calling - Function Types</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+            line-height: 1.6;
+            background-color: #f9f9f9;
+        }
+        h1 {
+            color: #333;
+        }
+        .explanation {
+            background-color: #f4f4f4;
+            padding: 15px;
+            border-left: 4px solid #007acc;
+            margin-bottom: 30px;
+        }
+        .example {
+            background-color: #fff;
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+        }
+        .example h3 {
+            margin-top: 0;
+            color: #007acc;
+        }
+        .output {
+            background-color: #e8f4f8;
+            padding: 10px;
+            border-left: 3px solid #28a745;
+            margin-top: 10px;
+            font-family: monospace;
+        }
+        .note {
+            background-color: #fff3cd;
+            padding: 10px;
+            border-left: 3px solid #ffc107;
+            margin-top: 10px;
+            font-size: 0.9em;
+        }
+        code {
+            background-color: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <h1>Functions: Declaring and Calling - Function Types</h1>
+    
+    <section class="explanation">
+        <h2>Explanation</h2>
+        <p><strong>Functions</strong> are reusable code blocks performing tasks. <strong>Declaring</strong> creates the function; <strong>calling</strong> executes it. JavaScript has three types: <strong>function declarations</strong> (hoisted, traditional), <strong>function expressions</strong> (stored in variables), and <strong>arrow functions</strong> (modern, concise).</p>
+    </section>
+
+    <section class="example">
+        <h3>Example 1: Function Declaration (Hoisted)</h3>
+        <p>Can be called <em>before</em> it's defined in code because it's "hoisted" to the top.</p>
+        <div class="output" id="output1">Running...</div>
+        <div class="note"><strong>Key benefit:</strong> Flexible placement in code - great for organizing related functions together.</div>
+    </section>
+
+    <section class="example">
+        <h3>Example 2: Function Expression (Not Hoisted)</h3>
+        <p>Must be defined <em>before</em> calling it - stored in a variable like any other value.</p>
+        <div class="output" id="output2">Running...</div>
+        <div class="note"><strong>Key benefit:</strong> Can be passed as arguments or stored in data structures.</div>
+    </section>
+
+    <script>
+        // Example 1: Function Declaration (demonstrating hoisting)
+        
+        // We can call this BEFORE it's declared!
+        const result1 = greet("Alice");
+        
+        // Function Declaration - hoisted to top
+        function greet(name) {
+            return "Hello, " + name + "!";
+        }
+        
+        // Display result on page
+        document.getElementById("output1").innerHTML = 
+            "✓ Called greet() before declaration: " + result1 + 
+            "<br>✓ Called again: " + greet("Charlie");
+
+        // ---
+
+        // Example 2: Function Expression (not hoisted)
+        
+        // Function Expression - must define first
+        const sayGoodbye = function(name) {
+            return "Goodbye, " + name + "!";
+        };
+        
+        // Now we can call it (after definition)
+        const result2 = sayGoodbye("Bob");
+        
+        // Arrow function (also a function expression)
+        const multiply = (a, b) => a * b;
+        
+        // Display results on page
+        document.getElementById("output2").innerHTML = 
+            "✓ Function expression: " + result2 + 
+            "<br>✓ Arrow function: 5 × 3 = " + multiply(5, 3) +
+            "<br>✓ Arrow function: 4² = " + multiply(4, 4);
+    </script>
+</body>
+</html>
