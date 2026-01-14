@@ -4,14 +4,49 @@
   "description": "Learning JavaScript with AI tools and automation",
   "private": true,
   "scripts": {
-    "test": "echo \"No tests configured yet\" && exit 0",
+    "test": "jest --coverage",
+    "test:watch": "jest --watch",
+    "test:ci": "jest --ci --coverage --maxWorkers=2",
     "lint": "eslint .",
-    "lint:fix": "eslint . --fix"
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write \"**/*.{js,json,md}\"",
+    "format:check": "prettier --check \"**/*.{js,json,md}\""
   },
   "devDependencies": {
-    "eslint": "^8.56.0"
+    "@types/jest": "^29.5.14",
+    "eslint": "^8.56.0",
+    "jest": "^29.7.0",
+    "prettier": "^3.7.4"
   },
-  "keywords": ["javascript", "learning", "ai", "automation"],
+  "jest": {
+    "testEnvironment": "node",
+    "coverageDirectory": "coverage",
+    "collectCoverageFrom": [
+      "src/**/*.js",
+      "!src/**/*.test.js",
+      "!src/**/*.spec.js",
+      "!**/node_modules/**"
+    ],
+    "coverageThreshold": {
+      "global": {
+        "branches": 70,
+        "functions": 70,
+        "lines": 70,
+        "statements": 70
+      }
+    },
+    "testMatch": [
+      "**/__tests__/**/*.js",
+      "**/*.test.js",
+      "**/*.spec.js"
+    ]
+  },
+  "keywords": [
+    "javascript",
+    "learning",
+    "ai",
+    "automation"
+  ],
   "author": "",
   "license": "MIT"
 }

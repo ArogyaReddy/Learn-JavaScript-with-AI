@@ -46,11 +46,35 @@ jobs:
         run: |
           echo "Scanning for functions without tests..."
           
-          # Find all JS files (excluding test files and node_modules)
-          SOURCE_FILES=$(find . -name "*.js" -not -path "*/node_modules/*" -not -path "*/test/*" -not -name "*.test.js" -not -name "*.spec.js")
+          # Find all JS files (excluding test files, config files, and build artifacts)
+          SOURCE_FILES=$(find . -name "*.js" \
+            -not -path "*/node_modules/*" \
+            -not -path "*/test/*" \
+            -not -path "*/tests/*" \
+            -not -path "*/__tests__/*" \
+            -not -path "*/dist/*" \
+            -not -path "*/build/*" \
+            -not -path "*/coverage/*" \
+            -not -path "*/.github/*" \
+            -not -name "*.test.js" \
+            -not -name "*.spec.js" \
+            -not -name "*.config.js" \
+            -not -name ".eslintrc.js" \
+            -not -name "jest.config.js" \
+            -not -name "webpack.config.js" \
+            -not -name "vite.config.js" \
+            -not -path "*/workarea/*" \
+          if [ -f "package.json" ]; then
+            npm test -- --coverage --json --outputFile=test-results.json 2>&1 || echo "No tests to run or tests failed"
+          else
+            echo "No package.json - skipping tests"
+          fi
           
           MISSING_TESTS=0
+          TOTAL_FILES=0
+          
           for file in $SOURCE_FILES; do
+            ((TOTAL_FILES++))
             # Check if corresponding test file exists
             TEST_FILE="${file%.js}.test.js"
             if [ ! -f "$TEST_FILE" ]; then
@@ -60,6 +84,11 @@ jobs:
           done
           
           echo "missing=$MISSING_TESTS" >> $GITHUB_OUTPUT
+          echo "total=$TOTAL_FILES" >> $GITHUB_OUTPUT
+          
+          if [ $TOTAL_FILES -eq 0 ]; then
+            echo "ℹ️ No source files found that require tests."
+          fi
           
       - name: Run existing tests
         id: run-tests

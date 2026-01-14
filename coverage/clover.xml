@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<coverage generated="1768352683664" clover="3.2.0">
+  <project timestamp="1768352683665" name="All files">
+    <metrics statements="27" coveredstatements="27" conditionals="24" coveredconditionals="24" methods="7" coveredmethods="7" elements="58" coveredelements="58" complexity="0" loc="27" ncloc="27" packages="1" files="2" classes="2"/>
+    <file name="calculator.js" path="/Users/arog/Learn/Learn-JavaScript-with-AI/src/utils/calculator.js">
+      <metrics statements="15" coveredstatements="15" conditionals="18" coveredconditionals="18" methods="4" coveredmethods="4"/>
+      <line num="12" count="14" type="cond" truecount="4" falsecount="0"/>
+      <line num="13" count="3" type="stmt"/>
+      <line num="15" count="11" type="stmt"/>
+      <line num="25" count="6" type="cond" truecount="4" falsecount="0"/>
+      <line num="26" count="2" type="stmt"/>
+      <line num="28" count="4" type="stmt"/>
+      <line num="38" count="8" type="cond" truecount="4" falsecount="0"/>
+      <line num="39" count="1" type="stmt"/>
+      <line num="41" count="7" type="stmt"/>
+      <line num="51" count="7" type="cond" truecount="4" falsecount="0"/>
+      <line num="52" count="2" type="stmt"/>
+      <line num="54" count="5" type="cond" truecount="2" falsecount="0"/>
+      <line num="55" count="1" type="stmt"/>
+      <line num="57" count="4" type="stmt"/>
+      <line num="60" count="1" type="stmt"/>
+    </file>
+    <file name="email.js" path="/Users/arog/Learn/Learn-JavaScript-with-AI/src/utils/email.js">
+      <metrics statements="12" coveredstatements="12" conditionals="6" coveredconditionals="6" methods="3" coveredmethods="3"/>
+      <line num="11" count="19" type="cond" truecount="2" falsecount="0"/>
+      <line num="12" count="4" type="stmt"/>
+      <line num="16" count="15" type="stmt"/>
+      <line num="17" count="15" type="stmt"/>
+      <line num="26" count="6" type="cond" truecount="2" falsecount="0"/>
+      <line num="27" count="3" type="stmt"/>
+      <line num="30" count="3" type="stmt"/>
+      <line num="31" count="3" type="stmt"/>
+      <line num="40" count="6" type="cond" truecount="2" falsecount="0"/>
+      <line num="41" count="3" type="stmt"/>
+      <line num="44" count="3" type="stmt"/>
+      <line num="47" count="1" type="stmt"/>
+    </file>
+  </project>
+</coverage>
