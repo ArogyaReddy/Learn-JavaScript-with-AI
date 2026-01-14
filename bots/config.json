@@ -1,0 +1,178 @@
+{
+  "globalSettings": {
+    "version": "1.0.0",
+    "timezone": "America/Los_Angeles",
+    "logLevel": "info",
+    "notificationMethod": "console",
+    "autoFixEnabled": true,
+    "safetyLevel": "conservative"
+  },
+  
+  "bots": {
+    "codeReview": {
+      "enabled": false,
+      "triggers": ["commit", "push"],
+      "autoFix": true,
+      "qualityThreshold": 80,
+      "blockOnCritical": false,
+      "notifyOn": ["critical", "warning"],
+      "maxComplexity": 10,
+      "maxFunctionLength": 50
+    },
+    
+    "testAutomation": {
+      "enabled": false,
+      "generateMissing": true,
+      "runOnSave": false,
+      "runOnCommit": true,
+      "minCoverage": 80,
+      "framework": "jest",
+      "watchMode": false,
+      "generateEdgeCases": true,
+      "mockExternal": true
+    },
+    
+    "prReviewer": {
+      "enabled": false,
+      "autoApprove": false,
+      "requireTests": true,
+      "requireDescription": true,
+      "maxPRSize": 500,
+      "minCoverage": 80,
+      "checkSecurity": true,
+      "checkPerformance": true,
+      "blockOnIssues": false,
+      "reviewStyle": "constructive"
+    },
+    
+    "autoFixer": {
+      "enabled": false,
+      "commitDirectly": false,
+      "createPR": true,
+      "autoMergePR": false,
+      "fixTypes": {
+        "formatting": true,
+        "syntax": true,
+        "bestPractices": true,
+        "documentation": false,
+        "security": false
+      },
+      "branchPrefix": "bot/auto-fix-",
+      "safetyChecks": true
+    },
+    
+    "securityScanner": {
+      "enabled": false,
+      "frequency": "daily",
+      "scanOnCommit": true,
+      "scanOnDependencyChange": true,
+      "autoUpdate": false,
+      "alertLevel": "high",
+      "blockDeploymentOn": ["critical"],
+      "scanners": ["npm-audit", "custom-patterns"],
+      "ignoreFiles": [".env.example", "test/**", "docs/**"]
+    }
+  },
+  
+  "schedulers": {
+    "morning": {
+      "enabled": false,
+      "time": "09:00",
+      "timezone": "America/Los_Angeles",
+      "tasks": [
+        "security-scan",
+        "dependency-check",
+        "generate-report"
+      ]
+    },
+    
+    "evening": {
+      "enabled": false,
+      "time": "18:00",
+      "timezone": "America/Los_Angeles",
+      "tasks": [
+        "cleanup-logs",
+        "backup-data",
+        "archive-old-issues"
+      ]
+    },
+    
+    "weekly": {
+      "enabled": false,
+      "day": "monday",
+      "time": "09:00",
+      "timezone": "America/Los_Angeles",
+      "tasks": [
+        "update-dependencies",
+        "full-test-suite",
+        "weekly-report",
+        "check-outdated"
+      ]
+    }
+  },
+  
+  "triggers": {
+    "onCommit": {
+      "enabled": false,
+      "bots": ["codeReview", "testAutomation"]
+    },
+    
+    "onPush": {
+      "enabled": false,
+      "bots": ["codeReview", "testAutomation", "securityScanner"]
+    },
+    
+    "onPR": {
+      "enabled": false,
+      "bots": ["prReviewer", "testAutomation"]
+    },
+    
+    "onIssue": {
+      "enabled": false,
+      "bots": ["autoFixer"]
+    },
+    
+    "onDependencyChange": {
+      "enabled": false,
+      "bots": ["securityScanner"]
+    }
+  },
+  
+  "notifications": {
+    "channels": {
+      "console": true,
+      "github": true,
+      "email": false,
+      "slack": false
+    },
+    
+    "emailSettings": {
+      "enabled": false,
+      "recipients": [],
+      "digestFrequency": "daily"
+    },
+    
+    "slackSettings": {
+      "enabled": false,
+      "webhookURL": "",
+      "channel": "#automation",
+      "notifyOn": ["critical", "error"]
+    }
+  },
+  
+  "safety": {
+    "requireTestsBeforeMerge": true,
+    "requireReviewBeforeMerge": false,
+    "autoMergeAllowed": false,
+    "allowedAutoFixTypes": ["formatting", "syntax"],
+    "protectedBranches": ["main", "master", "production"],
+    "dryRunMode": false
+  },
+  
+  "metrics": {
+    "trackBotActivity": true,
+    "trackTimeSaved": true,
+    "trackBugsPrevented": true,
+    "reportFrequency": "weekly"
+  }
+}

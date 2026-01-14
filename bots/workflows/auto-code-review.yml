@@ -1,0 +1,110 @@
+name: Auto Code Review
+on:
+  push:
+    branches: ['**']
+  pull_request:
+    branches: ['**']
+
+jobs:
+  code-review:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          
+      - name: Check for package.json
+        id: check-package
+        run: |
+          if [ -f "package.json" ]; then
+            echo "has_package=true" >> $GITHUB_OUTPUT
+          else
+            echo "has_package=false" >> $GITHUB_OUTPUT
+          fi
+          
+      - name: Install dependencies
+        if: steps.check-package.outputs.has_package == 'true'
+        run: npm ci || npm install
+        
+      - name: Run ESLint
+        id: eslint
+        run: |
+          if [ -f "package.json" ]; then
+            npx eslint . --format json --output-file eslint-report.json || true
+          else
+            echo "[]" > eslint-report.json
+            echo "ℹ️ No package.json found. Skipping ESLint."
+          fi
+          
+      - name: Analyze Code Quality
+        id: quality
+        run: |
+          # Calculate code quality metrics
+          echo "Running code quality analysis..."
+          
+          # Count issues by severity
+          ERRORS=$(cat eslint-report.json | jq '[.[].messages[] | select(.severity == 2)] | length')
+          WARNINGS=$(cat eslint-report.json | jq '[.[].messages[] | select(.severity == 1)] | length')
+          
+          echo "errors=$ERRORS" >> $GITHUB_OUTPUT
+          echo "warnings=$WARNINGS" >> $GITHUB_OUTPUT
+          
+      - name: Post Code Review Comment
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const fs = require('fs');
+            const report = JSON.parse(fs.readFileSync('eslint-report.json', 'utf8'));
+            
+            let comment = '## 🤖 Automated Code Review\n\n';
+            comment += '### 📊 Summary\n';
+            comment += `- Errors: ${process.env.ERRORS || 0}\n`;
+            comment += `- Warnings: ${process.env.WARNINGS || 0}\n\n`;
+            
+            if (report.length > 0) {
+              comment += '### 🔍 Issues Found\n\n';
+              
+              report.forEach(file => {
+                if (file.messages.length > 0) {
+                  comment += `#### ${file.filePath}\n`;
+                  file.messages.forEach(msg => {
+                    const severity = msg.severity === 2 ? '🔴' : '⚠️';
+                    comment += `- ${severity} Line ${msg.line}: ${msg.message}\n`;
+                  });
+                  comment += '\n';
+                }
+              });
+            } else {
+              comment += '### ✅ No Issues Found!\nGreat job! Code looks clean.\n';
+            }
+            
+            comment += '\n---\n*Automated review by Code Review Bot*';
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+        env:
+          ERRORS: ${{ steps.quality.outputs.errors }}
+          WARNINGS: ${{ steps.quality.outputs.warnings }}
+          
+      - name: Check Quality Threshold
+        run: |
+          ERRORS=${{ steps.quality.outputs.errors }}
+          if [ "$ERRORS" -gt 5 ]; then
+            echo "❌ Too many errors ($ERRORS). Please fix critical issues."
+            exit 1
+          fi
+          echo "✅ Quality check passed!"

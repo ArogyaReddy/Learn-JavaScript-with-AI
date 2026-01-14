@@ -1,0 +1,17 @@
+{
+  "name": "learn-javascript-with-ai",
+  "version": "1.0.0",
+  "description": "Learning JavaScript with AI tools and automation",
+  "private": true,
+  "scripts": {
+    "test": "echo \"No tests configured yet\" && exit 0",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix"
+  },
+  "devDependencies": {
+    "eslint": "^8.56.0"
+  },
+  "keywords": ["javascript", "learning", "ai", "automation"],
+  "author": "",
+  "license": "MIT"
+}

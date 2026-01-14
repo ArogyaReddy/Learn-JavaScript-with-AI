@@ -1,0 +1,192 @@
+name: Auto PR Review
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  pr-review:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      checks: write
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          
+      - name: Check for package.json
+        id: check-package
+        run: |
+          if [ -f "package.json" ]; then
+            echo "has_package=true" >> $GITHUB_OUTPUT
+          else
+            echo "has_package=false" >> $GITHUB_OUTPUT
+            echo "ℹ️ No package.json found. Skipping dependency installation."
+          fi
+          
+      - name: Install dependencies
+        if: steps.check-package.outputs.has_package == 'true'
+        run: npm ci || npm install
+        
+      - name: Analyze PR Size
+        id: pr-size
+        run: |
+          FILES_CHANGED=$(git diff --name-only origin/${{ github.base_ref }}...HEAD | wc -l)
+          LINES_ADDED=$(git diff --numstat origin/${{ github.base_ref }}...HEAD | awk '{sum += $1} END {print sum}')
+          LINES_DELETED=$(git diff --numstat origin/${{ github.base_ref }}...HEAD | awk '{sum += $2} END {print sum}')
+          
+          echo "files=$FILES_CHANGED" >> $GITHUB_OUTPUT
+          echo "added=$LINES_ADDED" >> $GITHUB_OUTPUT
+          echo "deleted=$LINES_DELETED" >> $GITHUB_OUTPUT
+          
+          # Determine PR size
+          TOTAL_CHANGES=$((LINES_ADDED + LINES_DELETED))
+          if [ $TOTAL_CHANGES -lt 100 ]; then
+            echo "size=small" >> $GITHUB_OUTPUT
+          elif [ $TOTAL_CHANGES -lt 500 ]; then
+            echo "size=medium" >> $GITHUB_OUTPUT
+          else
+            echo "size=large" >> $GITHUB_OUTPUT
+          fi
+          
+      - name: Run Linting
+        id: lint
+        run: |
+          npx eslint . --format json --output-file lint-report.json || true
+          LINT_ISSUES=$(cat lint-report.json | jq '[.[].messages[]] | length')
+          echo "issues=$LINT_ISSUES" >> $GITHUB_OUTPUT
+          
+      - name: Run Tests
+        id: tests
+        run: |
+          npm test -- --json --outputFile=test-results.json || true
+          
+          if [ -f "test-results.json" ]; then
+            TESTS_PASSED=$(cat test-results.json | jq '.numPassedTests // 0')
+            TESTS_FAILED=$(cat test-results.json | jq '.numFailedTests // 0')
+          else
+            TESTS_PASSED=0
+            TESTS_FAILED=0
+          fi
+          
+          echo "passed=$TESTS_PASSED" >> $GITHUB_OUTPUT
+          echo "failed=$TESTS_FAILED" >> $GITHUB_OUTPUT
+          
+      - name: Check for Security Issues
+        id: security
+        run: |
+          # Simple pattern matching for common security issues
+          SECRETS_FOUND=$(git diff origin/${{ github.base_ref }}...HEAD | grep -i -E "(api[_-]?key|password|secret|token|private[_-]?key)" | wc -l)
+          echo "secrets=$SECRETS_FOUND" >> $GITHUB_OUTPUT
+          
+      - name: Post PR Review
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const prSize = '${{ steps.pr-size.outputs.size }}';
+            const filesChanged = '${{ steps.pr-size.outputs.files }}';
+            const linesAdded = '${{ steps.pr-size.outputs.added }}';
+            const linesDeleted = '${{ steps.pr-size.outputs.deleted }}';
+            const lintIssues = '${{ steps.lint.outputs.issues }}';
+            const testsPassed = '${{ steps.tests.outputs.passed }}';
+            const testsFailed = '${{ steps.tests.outputs.failed }}';
+            const secretsFound = '${{ steps.security.outputs.secrets }}';
+            
+            let review = '# 🤖 Automated PR Review\n\n';
+            review += '## 📊 PR Statistics\n';
+            review += `- **Size**: ${prSize.toUpperCase()}\n`;
+            review += `- **Files Changed**: ${filesChanged}\n`;
+            review += `- **Lines Added**: ${linesAdded}\n`;
+            review += `- **Lines Deleted**: ${linesDeleted}\n\n`;
+            
+            review += '## ✅ Quality Checks\n';
+            
+            // Lint check
+            if (lintIssues == 0) {
+              review += '- ✅ **Linting**: No issues found\n';
+            } else {
+              review += `- ⚠️ **Linting**: ${lintIssues} issues found\n`;
+            }
+            
+            // Test check
+            if (testsFailed == 0 && testsPassed > 0) {
+              review += `- ✅ **Tests**: All ${testsPassed} tests passing\n`;
+            } else if (testsFailed > 0) {
+              review += `- ❌ **Tests**: ${testsFailed} tests failing\n`;
+            } else {
+              review += `- ⚠️ **Tests**: No tests found or run\n`;
+            }
+            
+            // Security check
+            if (secretsFound == 0) {
+              review += '- ✅ **Security**: No secrets detected\n';
+            } else {
+              review += `- 🔴 **Security**: ${secretsFound} potential secrets found!\n`;
+            }
+            
+            review += '\n## 💡 Recommendations\n';
+            
+            // Size recommendation
+            if (prSize === 'large') {
+              review += '- ⚠️ PR is quite large. Consider splitting into smaller PRs for easier review.\n';
+            }
+            
+            // Lint recommendation
+            if (lintIssues > 0) {
+              review += '- Fix linting issues before merge\n';
+            }
+            
+            // Test recommendation
+            if (testsFailed > 0) {
+              review += '- 🔴 **Critical**: Fix failing tests before merge\n';
+            } else if (testsPassed == 0) {
+              review += '- Add tests for new functionality\n';
+            }
+            
+            // Security recommendation
+            if (secretsFound > 0) {
+              review += '- 🔴 **Critical**: Remove hardcoded secrets! Use environment variables.\n';
+            }
+            
+            // Overall recommendation
+            review += '\n## 🎯 Overall Status\n';
+            const hasBlockers = (testsFailed > 0 || secretsFound > 0);
+            
+            if (hasBlockers) {
+              review += '❌ **Changes Requested**: Please address the critical issues above.\n';
+            } else if (lintIssues > 5) {
+              review += '⚠️ **Needs Work**: Address linting issues.\n';
+            } else {
+              review += '✅ **Looks Good**: Ready for human review!\n';
+            }
+            
+            review += '\n---\n*Automated review by PR Reviewer Bot*';
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: review
+            });
+            
+            // Create check run
+            await github.rest.checks.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              name: 'PR Review Bot',
+              head_sha: context.payload.pull_request.head.sha,
+              status: 'completed',
+              conclusion: hasBlockers ? 'failure' : 'success',
+              output: {
+                title: hasBlockers ? 'Changes Requested' : 'Looks Good',
+                summary: review
+              }
+            });
