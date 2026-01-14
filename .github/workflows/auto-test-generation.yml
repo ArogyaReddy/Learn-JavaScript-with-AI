@@ -1,0 +1,100 @@
+name: Auto Test Generation
+on:
+  push:
+    paths:
+      - '**/*.js'
+      - '**/*.ts'
+  pull_request:
+    paths:
+      - '**/*.js'
+      - '**/*.ts'
+
+jobs:
+  test-automation:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          
+      - name: Install dependencies
+        run: npm ci || npm install
+        
+      - name: Check for missing tests
+        id: check-tests
+        run: |
+          echo "Scanning for functions without tests..."
+          
+          # Find all JS files (excluding test files and node_modules)
+          SOURCE_FILES=$(find . -name "*.js" -not -path "*/node_modules/*" -not -path "*/test/*" -not -name "*.test.js" -not -name "*.spec.js")
+          
+          MISSING_TESTS=0
+          for file in $SOURCE_FILES; do
+            # Check if corresponding test file exists
+            TEST_FILE="${file%.js}.test.js"
+            if [ ! -f "$TEST_FILE" ]; then
+              echo "Missing test: $TEST_FILE"
+              ((MISSING_TESTS++))
+            fi
+          done
+          
+          echo "missing=$MISSING_TESTS" >> $GITHUB_OUTPUT
+          
+      - name: Run existing tests
+        id: run-tests
+        run: |
+          npm test -- --coverage --json --outputFile=test-results.json || true
+          
+      - name: Check coverage
+        id: coverage
+        run: |
+          # Extract coverage percentage (if using Jest)
+          if [ -f "coverage/coverage-summary.json" ]; then
+            COVERAGE=$(cat coverage/coverage-summary.json | jq '.total.lines.pct')
+            echo "coverage=$COVERAGE" >> $GITHUB_OUTPUT
+          else
+            echo "coverage=0" >> $GITHUB_OUTPUT
+          fi
+          
+      - name: Post Test Report
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const missing = '${{ steps.check-tests.outputs.missing }}';
+            const coverage = '${{ steps.coverage.outputs.coverage }}';
+            
+            let comment = '## 🧪 Test Automation Report\n\n';
+            comment += '### 📊 Coverage\n';
+            comment += `- Current Coverage: ${coverage}%\n`;
+            comment += `- Target Coverage: 80%\n`;
+            comment += `- Missing Test Files: ${missing}\n\n`;
+            
+            if (coverage < 80) {
+              comment += '⚠️ **Coverage below target.** Consider adding more tests.\n\n';
+            } else {
+              comment += '✅ **Coverage target met!**\n\n';
+            }
+            
+            if (missing > 0) {
+              comment += `💡 **Suggestion**: ${missing} source files are missing test files. Would you like me to generate them?\n\n`;
+            }
+            
+            comment += '---\n*Automated report by Test Automation Bot*';
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
