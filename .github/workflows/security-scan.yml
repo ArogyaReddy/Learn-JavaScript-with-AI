@@ -1,0 +1,165 @@
+name: Security Scan
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  schedule:
+    # Run security scan daily at 2 AM UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+
+jobs:
+  npm-audit:
+    name: NPM Security Audit
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Run npm audit
+        run: |
+          echo "🔒 Running npm security audit..."
+          npm audit --audit-level=moderate --json > npm-audit.json || true
+          
+          # Display results
+          npm audit --audit-level=moderate || true
+          
+          # Check for high/critical vulnerabilities
+          HIGH_VULN=$(cat npm-audit.json | jq '.metadata.vulnerabilities.high // 0')
+          CRITICAL_VULN=$(cat npm-audit.json | jq '.metadata.vulnerabilities.critical // 0')
+          
+          echo "High vulnerabilities: $HIGH_VULN"
+          echo "Critical vulnerabilities: $CRITICAL_VULN"
+          
+          if [ "$CRITICAL_VULN" -gt 0 ]; then
+            echo "❌ Critical vulnerabilities found!"
+            exit 1
+          fi
+          
+          if [ "$HIGH_VULN" -gt 0 ]; then
+            echo "⚠️ High vulnerabilities found!"
+            exit 1
+          fi
+          
+          echo "✅ No critical or high vulnerabilities found"
+      
+      - name: Upload audit results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: npm-audit-results
+          path: npm-audit.json
+          retention-days: 30
+
+  dependency-review:
+    name: Dependency Review
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Dependency Review
+        uses: actions/dependency-review-action@v4
+        with:
+          fail-on-severity: moderate
+          deny-licenses: GPL-3.0, AGPL-3.0
+
+  secret-scan:
+    name: Secret Scanning
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Check for secrets in code
+        run: |
+          echo "🔍 Scanning for exposed secrets..."
+          
+          # Simple regex patterns for common secrets
+          PATTERNS=(
+            "password\s*=\s*['\"][^'\"]{8,}['\"]"
+            "api[_-]?key\s*=\s*['\"][^'\"]{20,}['\"]"
+            "secret\s*=\s*['\"][^'\"]{20,}['\"]"
+            "token\s*=\s*['\"][^'\"]{20,}['\"]"
+            "aws[_-]?access[_-]?key"
+            "AKIA[0-9A-Z]{16}"
+            "sk_live_[0-9a-zA-Z]{24,}"
+            "ghp_[0-9a-zA-Z]{36}"
+          )
+          
+          FOUND=0
+          for pattern in "${PATTERNS[@]}"; do
+            if grep -rInE "$pattern" --exclude-dir={node_modules,.git,coverage,dist,build} .; then
+              echo "⚠️ Potential secret found matching pattern: $pattern"
+              FOUND=1
+            fi
+          done
+          
+          if [ $FOUND -eq 1 ]; then
+            echo "❌ Potential secrets detected in code!"
+            echo "Please remove sensitive data and use environment variables instead."
+            exit 1
+          fi
+          
+          echo "✅ No obvious secrets detected"
+
+  security-report:
+    name: Generate Security Report
+    runs-on: ubuntu-latest
+    needs: [npm-audit]
+    if: always()
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Download audit results
+        uses: actions/download-artifact@v4
+        with:
+          name: npm-audit-results
+        continue-on-error: true
+      
+      - name: Generate security summary
+        run: |
+          echo "# 🔒 Security Scan Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Scan Date:** $(date)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          if [ -f npm-audit.json ]; then
+            echo "## NPM Audit Results" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            
+            TOTAL=$(cat npm-audit.json | jq '.metadata.vulnerabilities.total // 0')
+            INFO=$(cat npm-audit.json | jq '.metadata.vulnerabilities.info // 0')
+            LOW=$(cat npm-audit.json | jq '.metadata.vulnerabilities.low // 0')
+            MODERATE=$(cat npm-audit.json | jq '.metadata.vulnerabilities.moderate // 0')
+            HIGH=$(cat npm-audit.json | jq '.metadata.vulnerabilities.high // 0')
+            CRITICAL=$(cat npm-audit.json | jq '.metadata.vulnerabilities.critical // 0')
+            
+            echo "| Severity | Count |" >> $GITHUB_STEP_SUMMARY
+            echo "|----------|-------|" >> $GITHUB_STEP_SUMMARY
+            echo "| Critical | $CRITICAL |" >> $GITHUB_STEP_SUMMARY
+            echo "| High | $HIGH |" >> $GITHUB_STEP_SUMMARY
+            echo "| Moderate | $MODERATE |" >> $GITHUB_STEP_SUMMARY
+            echo "| Low | $LOW |" >> $GITHUB_STEP_SUMMARY
+            echo "| Info | $INFO |" >> $GITHUB_STEP_SUMMARY
+            echo "| **Total** | **$TOTAL** |" >> $GITHUB_STEP_SUMMARY
+          fi

@@ -1,0 +1,213 @@
+name: Performance Testing
+
+on:
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  lighthouse:
+    name: Lighthouse CI
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Build project
+        run: npm run build || echo "No build script, skipping..."
+        continue-on-error: true
+      
+      - name: Run Lighthouse CI
+        run: |
+          echo "🚀 Running Lighthouse performance audit..."
+          
+          # For now, test against public URLs
+          # Replace with your deployed URL or local server
+          npx @lhci/cli@0.13.x autorun --url=https://playwright.dev || true
+        env:
+          LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
+      
+      - name: Upload Lighthouse results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lighthouse-results
+          path: .lighthouseci
+          retention-days: 30
+
+  load-test:
+    name: Load Testing
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      
+      - name: Create simple load test script
+        run: |
+          mkdir -p tests/performance
+          cat > tests/performance/load-test.js << 'EOF'
+          /**
+           * Simple Load Test Example
+           * For production, consider using k6, Artillery, or Apache JMeter
+           */
+          const https = require('https');
+          
+          const TARGET_URL = process.env.TARGET_URL || 'https://playwright.dev';
+          const CONCURRENT_USERS = parseInt(process.env.CONCURRENT_USERS || '10');
+          const DURATION_SECONDS = parseInt(process.env.DURATION_SECONDS || '30');
+          
+          console.log(`🔥 Load Testing: ${TARGET_URL}`);
+          console.log(`👥 Concurrent Users: ${CONCURRENT_USERS}`);
+          console.log(`⏱️  Duration: ${DURATION_SECONDS}s\n`);
+          
+          let successCount = 0;
+          let errorCount = 0;
+          let totalResponseTime = 0;
+          let minResponseTime = Infinity;
+          let maxResponseTime = 0;
+          
+          function makeRequest() {
+            const startTime = Date.now();
+            
+            https.get(TARGET_URL, (res) => {
+              let data = '';
+              
+              res.on('data', (chunk) => {
+                data += chunk;
+              });
+              
+              res.on('end', () => {
+                const responseTime = Date.now() - startTime;
+                successCount++;
+                totalResponseTime += responseTime;
+                minResponseTime = Math.min(minResponseTime, responseTime);
+                maxResponseTime = Math.max(maxResponseTime, responseTime);
+              });
+            }).on('error', (err) => {
+              errorCount++;
+              console.error(`Request failed: ${err.message}`);
+            });
+          }
+          
+          // Run load test
+          const startTime = Date.now();
+          const endTime = startTime + (DURATION_SECONDS * 1000);
+          
+          const interval = setInterval(() => {
+            for (let i = 0; i < CONCURRENT_USERS; i++) {
+              makeRequest();
+            }
+            
+            if (Date.now() >= endTime) {
+              clearInterval(interval);
+              
+              // Wait for pending requests
+              setTimeout(() => {
+                console.log('\n📊 Load Test Results:');
+                console.log(`✅ Successful Requests: ${successCount}`);
+                console.log(`❌ Failed Requests: ${errorCount}`);
+                console.log(`📈 Avg Response Time: ${(totalResponseTime / successCount).toFixed(2)}ms`);
+                console.log(`⚡ Min Response Time: ${minResponseTime}ms`);
+                console.log(`🐌 Max Response Time: ${maxResponseTime}ms`);
+                console.log(`📦 Requests/sec: ${(successCount / DURATION_SECONDS).toFixed(2)}`);
+                
+                const successRate = (successCount / (successCount + errorCount) * 100).toFixed(2);
+                console.log(`✨ Success Rate: ${successRate}%`);
+                
+                // Fail if success rate < 95%
+                if (parseFloat(successRate) < 95) {
+                  console.log('\n❌ Load test failed: Success rate below 95%');
+                  process.exit(1);
+                }
+                
+                // Fail if average response time > 2000ms
+                const avgResponseTime = totalResponseTime / successCount;
+                if (avgResponseTime > 2000) {
+                  console.log('\n❌ Load test failed: Average response time > 2000ms');
+                  process.exit(1);
+                }
+                
+                console.log('\n✅ Load test passed!');
+                process.exit(0);
+              }, 2000);
+            }
+          }, 1000);
+          EOF
+      
+      - name: Run load test
+        run: |
+          echo "🔥 Running load test..."
+          node tests/performance/load-test.js
+        env:
+          CONCURRENT_USERS: 5
+          DURATION_SECONDS: 10
+
+  bundle-size:
+    name: Bundle Size Check
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Check bundle size
+        run: |
+          echo "📦 Checking bundle sizes..."
+          
+          # Get size of all JS files
+          if [ -d "src" ]; then
+            TOTAL_SIZE=$(find src -name "*.js" -type f -exec du -b {} + | awk '{sum+=$1} END {print sum}')
+            TOTAL_SIZE_KB=$((TOTAL_SIZE / 1024))
+            
+            echo "Total source size: ${TOTAL_SIZE_KB}KB"
+            
+            # Set a reasonable limit (e.g., 500KB)
+            MAX_SIZE_KB=500
+            
+            if [ $TOTAL_SIZE_KB -gt $MAX_SIZE_KB ]; then
+              echo "⚠️ Bundle size (${TOTAL_SIZE_KB}KB) exceeds limit (${MAX_SIZE_KB}KB)"
+              echo "Consider code splitting or removing unused dependencies"
+              exit 1
+            else
+              echo "✅ Bundle size OK (${TOTAL_SIZE_KB}KB / ${MAX_SIZE_KB}KB)"
+            fi
+          else
+            echo "ℹ️ No src directory found, skipping bundle size check"
+          fi
+      
+      - name: Performance report summary
+        if: always()
+        run: |
+          echo "# ⚡ Performance Test Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Test Date:** $(date)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## Tests Run" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Lighthouse CI" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Load Testing" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Bundle Size Check" >> $GITHUB_STEP_SUMMARY

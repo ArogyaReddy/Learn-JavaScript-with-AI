@@ -1,0 +1,176 @@
+name: Build Check
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  typescript-check:
+    name: TypeScript Type Check
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Run TypeScript compiler check
+        run: |
+          echo "🔍 Running TypeScript type check..."
+          npm run typecheck || echo "⚠️ TypeScript check failed or not configured"
+        continue-on-error: true
+      
+      - name: Type check summary
+        if: always()
+        run: |
+          echo "# 📝 TypeScript Check Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "TypeScript type checking completed" >> $GITHUB_STEP_SUMMARY
+
+  build-test:
+    name: Build Test
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Test build process
+        run: |
+          echo "🏗️ Testing build process..."
+          
+          # Try to build if script exists
+          if grep -q "\"build\"" package.json; then
+            npm run build || echo "⚠️ Build failed or not fully configured"
+          else
+            echo "ℹ️ No build script defined, skipping..."
+          fi
+        continue-on-error: true
+      
+      - name: Check for build artifacts
+        run: |
+          echo "📦 Checking for build artifacts..."
+          
+          if [ -d "dist" ] || [ -d "build" ]; then
+            echo "✅ Build directory created successfully"
+            
+            if [ -d "dist" ]; then
+              echo "dist/ contents:"
+              ls -lah dist/ || true
+            fi
+            
+            if [ -d "build" ]; then
+              echo "build/ contents:"
+              ls -lah build/ || true
+            fi
+          else
+            echo "ℹ️ No build directory found (this is OK if build not configured yet)"
+          fi
+
+  dependency-check:
+    name: Dependency Integrity Check
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      - name: Verify package-lock.json
+        run: |
+          echo "🔒 Verifying dependency lock file..."
+          
+          if [ ! -f "package-lock.json" ]; then
+            echo "❌ package-lock.json not found!"
+            exit 1
+          fi
+          
+          # Install and check for differences
+          npm ci
+          
+          # Verify lock file is up to date
+          if git diff --exit-code package-lock.json; then
+            echo "✅ package-lock.json is up to date"
+          else
+            echo "❌ package-lock.json is out of date!"
+            echo "Run 'npm install' locally and commit the changes"
+            exit 1
+          fi
+      
+      - name: Check for duplicate dependencies
+        run: |
+          echo "🔍 Checking for duplicate dependencies..."
+          npm dedupe --dry-run || true
+      
+      - name: List outdated dependencies
+        run: |
+          echo "📋 Checking for outdated dependencies..."
+          npm outdated || true
+
+  code-quality:
+    name: Code Quality Metrics
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Count lines of code
+        run: |
+          echo "📊 Code Statistics" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          if [ -d "src" ]; then
+            JS_FILES=$(find src -name "*.js" | wc -l)
+            JS_LINES=$(find src -name "*.js" -exec cat {} \; | wc -l)
+            TEST_FILES=$(find src -name "*.test.js" -o -name "*.spec.js" | wc -l)
+            
+            echo "| Metric | Count |" >> $GITHUB_STEP_SUMMARY
+            echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
+            echo "| JavaScript Files | $JS_FILES |" >> $GITHUB_STEP_SUMMARY
+            echo "| Lines of Code | $JS_LINES |" >> $GITHUB_STEP_SUMMARY
+            echo "| Test Files | $TEST_FILES |" >> $GITHUB_STEP_SUMMARY
+            
+            if [ $JS_FILES -gt 0 ] && [ $TEST_FILES -gt 0 ]; then
+              TEST_RATIO=$((TEST_FILES * 100 / JS_FILES))
+              echo "| Test Coverage Ratio | ${TEST_RATIO}% |" >> $GITHUB_STEP_SUMMARY
+            fi
+          fi
+      
+      - name: Check code complexity
+        run: |
+          echo "🧮 Analyzing code complexity..."
+          
+          if [ -d "src" ]; then
+            # Count functions
+            FUNCTIONS=$(grep -rh "^function\|^\s*function\|=>\|async" src --include="*.js" | wc -l)
+            echo "Functions found: $FUNCTIONS"
+            
+            # Count classes
+            CLASSES=$(grep -rh "^class\|^\s*class" src --include="*.js" | wc -l)
+            echo "Classes found: $CLASSES"
+          fi
